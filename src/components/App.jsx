@@ -1,16 +1,17 @@
-export const App = () => {
+import { useState } from "react";
+import Searchbar from "./Searchbar";
+import ImageGallery from "./ImageGallery";
+import { ToastContainer } from "react-toastify";
+import { Wrapper } from "./App.styled";
+
+export default function App() {
+  const [searchPhrase, setSearchPhrase] = useState('');
+
   return (
-    <div
-      style={{
-        height: '100vh',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        fontSize: 40,
-        color: '#010101'
-      }}
-    >
-      React homework template
-    </div>
+      <Wrapper>
+        <Searchbar onSubmit={setSearchPhrase} />
+        <ImageGallery searchPhrase={searchPhrase}/>
+        <ToastContainer autoClose={3000}/>
+      </Wrapper>
   );
 };
