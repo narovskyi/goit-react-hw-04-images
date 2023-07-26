@@ -16,10 +16,9 @@ const status = {
     ERROR: 'error'
 }
 
-export default function ImageGallery({ searchPhrase }) {
+export default function ImageGallery({ searchPhrase, page, setPageNumber }) {
     const [galleryItems, setGalleryItems] = useState([]);
     const [statusState, setStatusState] = useState(status.IDLE);
-    const [page, setPage] = useState(1);
     const [showModal, setShowModal] = useState(false);
     const [imageInModal, setImageInModal] = useState({ imageUrl: '', altImageText: '' });
     
@@ -27,37 +26,33 @@ export default function ImageGallery({ searchPhrase }) {
         if (!searchPhrase) {
             return;
         }
-        setStatusState(status.PENDING);
-        api.fetchPhoto(1, searchPhrase)
-            .then(photos => {
-                if (photos.length === 0) {
-                    setStatusState(status.NOTHING_FOUND);
-                } else if (photos.length < 12 && photos.length > 0) {
-                    setGalleryItems([...photos]);
-                    setStatusState(status.LAST_PAGE);
-                } else {
-                    setGalleryItems([...photos]);
-                    setStatusState(status.RESOLVED);
-                    setPage(1);
-                }
-            })
-            .catch(error => {
-                setGalleryItems([]);
-                setStatusState(status.ERROR);
-            });
-    }, [searchPhrase]);
-
-    useEffect(() => {
         if (page === 1) {
-            return;
-        }
-        api.fetchPhoto(page, searchPhrase)
+            setStatusState(status.PENDING);
+            api.fetchPhoto(page, searchPhrase)
+                .then(photos => {
+                    if (photos.length === 0) {
+                        setStatusState(status.NOTHING_FOUND);
+                    } else if (photos.length < 12 && photos.length > 0) {
+                        setGalleryItems([...photos]);
+                        setStatusState(status.LAST_PAGE);
+                    } else {
+                        setGalleryItems([...photos]);
+                        setStatusState(status.RESOLVED);
+                    }
+                })
+                .catch(error => {
+                    console.log(error);
+                    setGalleryItems([]);
+                    setStatusState(status.ERROR);
+                });
+        } else {
+            api.fetchPhoto(page, searchPhrase)
             .then(photos => {
                 if (photos.length < 12 && photos.length >= 0) {
-                    setGalleryItems([...galleryItems, ...photos]);
+                    setGalleryItems(prevGalleryItems => [...prevGalleryItems, ...photos]);
                     setStatusState(status.LAST_PAGE);
                 } else {
-                    setGalleryItems([...galleryItems, ...photos]);
+                    setGalleryItems(prevGalleryItems => [...prevGalleryItems, ...photos]);
                     setStatusState(status.RESOLVED);
                 }
             })
@@ -65,10 +60,11 @@ export default function ImageGallery({ searchPhrase }) {
                 setGalleryItems([]);
                 setStatusState(status.ERROR);
             });
-    }, [page]);
+        }
+    }, [page, searchPhrase]);
 
     const handleButtonClick = () => {
-        setPage(page + 1);
+        setPageNumber(page + 1);
     }
 
     const closeModal = () => {

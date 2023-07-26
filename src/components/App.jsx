@@ -6,11 +6,17 @@ import { Wrapper } from "./App.styled";
 
 export default function App() {
   const [searchPhrase, setSearchPhrase] = useState('');
+  const [page, setPage] = useState(1);
+
+  const handleSearchSubmit = (query) => {
+    setPage(1);
+    setSearchPhrase(query);
+  }
 
   return (
       <Wrapper>
-        <Searchbar onSubmit={setSearchPhrase} />
-        <ImageGallery searchPhrase={searchPhrase}/>
+        <Searchbar onSubmit={handleSearchSubmit} />
+      <ImageGallery searchPhrase={searchPhrase} page={page} setPageNumber={setPage} />
         <ToastContainer autoClose={3000}/>
       </Wrapper>
   );
